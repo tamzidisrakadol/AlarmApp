@@ -5,18 +5,13 @@ import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
-import android.content.Context.ALARM_SERVICE
 import android.content.Intent
-import android.content.IntentFilter
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.databinding.FragmentFirstBinding
 import com.example.myapplication.service.AlarmReceiver
@@ -60,7 +55,7 @@ class FirstFragment : Fragment() {
             pickUpTime(it)
         }
         binding.setAlarmBtn.setOnClickListener {
-            setAlarm2()
+            setAlarm()
         }
         binding.cancelAlarmBtn.setOnClickListener {
 //            if (checkAlarm){
@@ -124,30 +119,8 @@ class FirstFragment : Fragment() {
     }
 
 
+
     private fun setAlarm(){
-        var time=0
-        var calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_YEAR,year)
-        calendar.set(Calendar.MONTH,month-1)
-        calendar.set(Calendar.DAY_OF_MONTH,day)
-        calendar.set(Calendar.HOUR_OF_DAY,selectedHour)
-        calendar.set(Calendar.MINUTE,selectedMin)
-
-        val intent = Intent(context,AlarmReceiver::class.java)
-        pendingIntent=PendingIntent.getBroadcast(context,0,intent,PendingIntent.FLAG_IMMUTABLE)
-
-        time = ((calendar.timeInMillis-calendar.timeInMillis) % 6000).toInt()
-        if (System.currentTimeMillis()>time){
-            time = if (Calendar.AM_PM==0){
-                time+1000*60*60*12
-            }else{
-                time+1000*60*60*24
-            }
-        }
-        alarmManager?.setRepeating(AlarmManager.RTC_WAKEUP, time.toLong(),1000,pendingIntent)
-        checkAlarm = true
-    }
-    private fun setAlarm2(){
         var time=0
         var calendar = Calendar.getInstance()
         calendar.set(Calendar.YEAR, year)
