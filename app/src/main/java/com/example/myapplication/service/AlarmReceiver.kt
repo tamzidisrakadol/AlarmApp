@@ -11,6 +11,9 @@ class AlarmReceiver:BroadcastReceiver() {
 
 
     override fun onReceive(context: Context?, intent: Intent?) {
+
+
+
         val vibrator = context?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         vibrator.vibrate(4000)
         Toast.makeText(context, "wake up", Toast.LENGTH_SHORT).show()

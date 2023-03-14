@@ -24,7 +24,7 @@ class FirstFragment : Fragment() {
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
     private var pendingIntent:PendingIntent? = null
-    private  var alarmManager: AlarmManager? =null
+    private  var alarmManager: AlarmManager? = null
     private var selectedHour:Int=0
     private var selectedMin:Int=0
     private var year:Int=0
@@ -42,6 +42,7 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         binding.buttonFirst.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
@@ -57,6 +58,8 @@ class FirstFragment : Fragment() {
         binding.setAlarmBtn.setOnClickListener {
             setAlarm()
         }
+
+
         binding.cancelAlarmBtn.setOnClickListener {
 //            if (checkAlarm){
 //                alarmManager!!.cancel(pendingIntent)
