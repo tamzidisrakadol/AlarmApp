@@ -23,14 +23,14 @@ class FirstFragment : Fragment() {
 
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
-    private var pendingIntent:PendingIntent? = null
-    private  var alarmManager: AlarmManager? = null
-    private var selectedHour:Int=0
-    private var selectedMin:Int=0
-    private var year:Int=0
-    private var month:Int=0
-    private var day:Int=0
-    private var checkAlarm:Boolean = false
+    private var pendingIntent: PendingIntent? = null
+    private var alarmManager: AlarmManager? = null
+    private var selectedHour: Int = 0
+    private var selectedMin: Int = 0
+    private var selectedYearForAlarm: Int = 0
+    private var selectedMonthForAlarm: Int = 0
+    private var selectedDayForAlarm: Int = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,7 +43,7 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        //  alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         binding.buttonFirst.setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
@@ -56,17 +56,10 @@ class FirstFragment : Fragment() {
             pickUpTime(it)
         }
         binding.setAlarmBtn.setOnClickListener {
-            setAlarm()
+            setAlarm3(selectedYearForAlarm,selectedMonthForAlarm,selectedDayForAlarm,selectedHour,selectedMin)
         }
-
-
         binding.cancelAlarmBtn.setOnClickListener {
-//            if (checkAlarm){
-//                alarmManager!!.cancel(pendingIntent)
-//                Toast.makeText(context, "alarm off", Toast.LENGTH_SHORT).show()
-//            }else{
-//                Toast.makeText(context, "set Alarm First", Toast.LENGTH_SHORT).show()
-//            }
+//
         }
     }
 
@@ -77,12 +70,11 @@ class FirstFragment : Fragment() {
     }
 
 
-
     private fun pickUpDate(view: View) {
         val myCalendar = Calendar.getInstance()
-         year = myCalendar.get(Calendar.YEAR)
-         month = myCalendar.get(Calendar.MONTH)
-         day = myCalendar.get(Calendar.DAY_OF_MONTH)
+        val selectedYear = myCalendar.get(Calendar.YEAR)
+        val selectedMonth = myCalendar.get(Calendar.MONTH)
+        val selectedDay = myCalendar.get(Calendar.DAY_OF_MONTH)
 
 
         val dpd = context?.let {
@@ -93,9 +85,11 @@ class FirstFragment : Fragment() {
                     binding.selectDate.text = selectDate
                     val sdf = SimpleDateFormat("dd/MM/yyy", Locale.ENGLISH)
                     val castToDate = sdf.parse(selectDate) as Date
-
+                    selectedYearForAlarm = selectedYear
+                    selectedDayForAlarm = selectedDate
+                    selectedMonthForAlarm = selectedMonth
                 },
-                year, month, day
+                selectedYear, selectedMonth, selectedDay
             )
         }
         dpd!!.show()
@@ -105,14 +99,15 @@ class FirstFragment : Fragment() {
     private fun pickUpTime(view: View) {
 
         val myCalendar = Calendar.getInstance()
-         selectedHour = myCalendar.get(Calendar.HOUR)
-         selectedMin = myCalendar.get(Calendar.MINUTE)
+        selectedHour = myCalendar.get(Calendar.HOUR)
+        selectedMin = myCalendar.get(Calendar.MINUTE)
 
 
-        val mTimePicker = TimePickerDialog(context,
+        val mTimePicker = TimePickerDialog(
+            context,
             { view, hourOfDay, minute ->
                 val selectedTime = "$hourOfDay:$minute"
-                binding.selectTime.text=selectedTime
+                binding.selectTime.text = selectedTime
                 val sdf = SimpleDateFormat("HH:mm", Locale.ENGLISH)
                 val castToTime = sdf.parse(selectedTime) as Date
             }, selectedHour, selectedMin, false
@@ -121,36 +116,33 @@ class FirstFragment : Fragment() {
         mTimePicker.show()
     }
 
-
-
-    private fun setAlarm(){
-        var time=0
-        var calendar = Calendar.getInstance()
+    private fun setAlarm3(year: Int, month: Int, dayOfMonth: Int, hourOfDay: Int, minute: Int) {
+        val calendar = Calendar.getInstance()
         calendar.set(Calendar.YEAR, year)
         calendar.set(Calendar.MONTH, month)
-        calendar.set(Calendar.DAY_OF_MONTH, day)
-        calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-        calendar.set(Calendar.MINUTE, selectedMin)
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+        calendar.set(Calendar.MINUTE, minute)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
-        calendar.set(Calendar.AM_PM, if (selectedHour < 12) Calendar.AM else Calendar.PM)
+        calendar.set(Calendar.AM_PM, if (hourOfDay < 12) Calendar.AM else Calendar.PM)
 
+        alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-        time = (calendar.timeInMillis - System.currentTimeMillis()).toInt()
-        if (time < 0) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-            time = (calendar.timeInMillis - System.currentTimeMillis()).toInt()
-        }
-        alarmManager?.setRepeating(AlarmManager.RTC_WAKEUP, time.toLong(),AlarmManager.INTERVAL_DAY, pendingIntent)
-        checkAlarm = true
+        // Set the alarm to trigger at the specified time
+        alarmManager?.setExact(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            pendingIntent
+        )
     }
-
-
-
-
-
 
 
 }
