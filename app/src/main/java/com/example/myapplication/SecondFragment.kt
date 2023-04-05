@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.myapplication.databinding.FragmentSecondBinding
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
+
 
 
 class SecondFragment : Fragment() {
@@ -56,10 +57,10 @@ class SecondFragment : Fragment() {
             DatePickerDialog(
                 it,
                 DatePickerDialog.OnDateSetListener { view, selectedYear, selectedMonth, selectedDate ->
-                    val selectDate = "$selectedDate-${selectedMonth + 1}-$selectedYear"
+                    val exactMonth = selectedMonth+1
+                    val selectDate = "$selectedDate-$exactMonth-$selectedYear"
                     binding.warrantySelectDate.text = selectDate
-                    selectedDateIntoMs(selectedMonth,selectedDay,selectedYear)
-
+                    daysLeft(selectedDate,exactMonth,selectedYear)
                 },
                 selectedYear, selectedMonth, selectedDay
             )
@@ -69,20 +70,24 @@ class SecondFragment : Fragment() {
         dpd?.show()
     }
 
-    private fun daysLeftChecker(timeInMs:Long){
+    private fun daysLeft(selectedDay:Int,selectedMonth:Int,selectedYear:Int) {
 
-        val maximumDate = 90*86400000
-        val daysLeft = timeInMs-maximumDate
-        val msToDay = daysLeft/86400000
-        binding.warrantyTimeLeft.text = msToDay.toString()
+        val currentDate = Calendar.getInstance().time
+        val expireDate = "$selectedDay-${selectedMonth+3}-$selectedYear"
+
+        val sdf = SimpleDateFormat("dd-MM-yyyy")
+        val formatCurrentDate = sdf.format(currentDate)
+        Log.d("tag","$expireDate and $formatCurrentDate")
+        val firstDate = sdf.parse(formatCurrentDate)
+        val secondDate = sdf.parse(expireDate)
+        val difference = kotlin.math.abs(firstDate.time - secondDate.time)
+        val differenceToDay = difference / (24 * 60 * 60 * 1000)
+        binding.warrantyTimeLeft.text =differenceToDay.toString()
     }
 
-    private fun selectedDateIntoMs(month:Int,dayOfMonth:Int,year:Int){
-        val calendar = Calendar.getInstance()
-        calendar.set(year,month,dayOfMonth)
-        val timeInMs = calendar.timeInMillis
-        daysLeftChecker(timeInMs)
-    }
+
+
+
 }
 
 
